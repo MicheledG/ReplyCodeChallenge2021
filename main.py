@@ -62,6 +62,10 @@ def read_input_file(filename):
         )
     return width, height, buildings, antennas, reward
 
+def compute_score(buildings, antennas, i, j, Xa, Ya):
+    score = buildings[i][3]* antennas[j][1] -
+            buildings[i][2] * manhattandistance(buildings[i][0],buildings[i][1], Xa, Ya)
+    return score
 
 def sort_antennas_by_connection_speed(antennas):
     logger.debug(f'original list of antennas:\n{antennas}')
