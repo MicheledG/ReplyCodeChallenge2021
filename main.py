@@ -17,6 +17,7 @@ def main(argv):
     logger.info(f'reading input file {filename}')
     width, height, buildings, antennas, reward = read_input_file(filename)
     logger.info('input file successfully read')
+    compute_score_per_building_antenna()
 
 
 def read_input_file(filename):
@@ -62,10 +63,23 @@ def read_input_file(filename):
         )
     return width, height, buildings, antennas, reward
 
-def compute_score(buildings, antennas, i, j, Xa, Ya):
-    score = buildings[i][3]* antennas[j][1] -
-            buildings[i][2] * manhattandistance(buildings[i][0],buildings[i][1], Xa, Ya)
+
+def compute_score_per_building_antenna(building, antenna, antenna_x, antenna_y):
+    logger.debug(
+        f'input to compute the score:\n'
+        f'building: {building}\n'
+        f'antenna: {antenna}\n'
+        f'antenna position: x={antenna_x}, y={antenna_y}'
+    )
+    score = building[3] * antenna[1] - building[2] * manhattan_distance(
+        building[0],
+        building[1],
+        antenna_x,
+        antenna_y
+    )
+    logger.debug(f'computed score: {score}')
     return score
+
 
 def reachable_buildings(antenna_x, antenna_y, antenna_range, buildings):
     """
