@@ -1,4 +1,9 @@
-import os
+"""
+Usage: python main.py <path_to>/<input_file_name>
+
+Note: python3
+"""
+
 import sys
 import logging
 
@@ -10,7 +15,7 @@ logging.basicConfig()
 def main(argv):
     filename = argv[1]
     logger.info(f'reading input file {filename}')
-    read_input_file(filename)
+    width, height, buildings, antennas, reward = read_input_file(filename)
     logger.info('input file successfully read')
 
 
@@ -32,6 +37,7 @@ def read_input_file(filename):
         buildings = list()
         for building_index in range(buildings_number):
             building_info = [int(x) for x in input_file.readline().split(' ')]
+            building_info.append(building_index)
             buildings.append(building_info)
         if len(buildings) != buildings_number:
             Exception(
@@ -41,6 +47,7 @@ def read_input_file(filename):
         antennas = list()
         for antenna_index in range(antennas_number):
             antenna_info = [int(x) for x in input_file.readline().split(' ')]
+            antenna_info.append(antenna_index)
             antennas.append(antenna_info)
         if len(antennas) != antennas_number:
             Exception(
@@ -54,6 +61,24 @@ def read_input_file(filename):
             f'reward: {reward}'
         )
     return width, height, buildings, antennas, reward
+
+
+def sort_antennas_by_connection_speed(antennas):
+    logger.debug(f'original list of antennas:\n{antennas}')
+    sorted_antennas = sorted(
+        antennas, key=lambda antenna: antenna[1], reverse=True  # antenna[1] is the antenna connection speed parameter
+    )
+    logger.debug(f'sorted antennas by connection speed:\n{sorted_antennas}')
+    return sorted_antennas
+
+
+def sort_antennas_by_range(antennas):
+    logger.debug(f'original list of antennas:\n{antennas}')
+    sorted_antennas = sorted(
+        antennas, key=lambda antenna: antenna[0], reverse=True  # antenna[0] is the antenna range parameter
+    )
+    logger.debug(f'sorted antennas by range speed:\n{sorted_antennas}')
+    return sorted_antennas
 
 
 if __name__ == '__main__':
