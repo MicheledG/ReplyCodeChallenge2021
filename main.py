@@ -8,8 +8,11 @@ import sys
 import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 logging.basicConfig()
+
+INPUT_FOLDER = 'input_file'
+OUTPUT_FOLDER = 'output_file'
 
 
 def main(argv):
@@ -37,7 +40,8 @@ def main(argv):
             antenna_scores[building[4]] = score
         all_antennas_scores[antenna[2]] = antenna_scores
     logger.info(f'computed antennas scores:\n{json.dumps(all_antennas_scores, indent=2)}')
-    create_output_file('test', all_antennas_scores, buildings)
+    create_output_file(filename, all_antennas_scores, buildings)
+    logger.info('end')
 
 
 def read_input_file(filename):
@@ -49,7 +53,7 @@ def read_input_file(filename):
     - M lines - parameters of antennas: Ar Ac
     :param filename:
     """
-    with open(filename, 'r') as input_file:
+    with open(f'{INPUT_FOLDER}/{filename}', 'r') as input_file:
         # read grid dimensions
         [width, height] = [int(x) for x in input_file.readline().split(' ')]
         # read buildings and antennas numbers
@@ -131,7 +135,7 @@ def find_reachable_buildings(antenna_x, antenna_y, antenna_range, buildings):
             logger.debug('building is reachable')
         else:
             logger.debug('building is not reachable by the provided point with the provide range')
-    logger.info(f'found {len(buildings_in_range)} reachable buildings')
+    logger.debug(f'found {len(buildings_in_range)} reachable buildings')
     return buildings_in_range
 
 
@@ -170,7 +174,7 @@ def sort_antennas_by_range(antennas):
 
 
 def create_output_file(filename, all_antennas_scores, buildings):
-    antenna_chosen_building = list()
+    antennas_chosen_building = list()
     buildings_availability = dict()
     for antenna_index in all_antennas_scores.keys():
         antenna_scores = all_antennas_scores[antenna_index]
@@ -182,8 +186,16 @@ def create_output_file(filename, all_antennas_scores, buildings):
                 best_building_index = building_index
                 best_building_score = building_score
         buildings_availability[best_building_index] = False
-        antenna_chosen_building.append(best_building_index)
+        antennas_chosen_building.append(best_building_index)
         logger.debug(f'antenna with index {antenna_index} placed on building {best_building_index}')
+    number_of_antennas = len(antennas_chosen_building)
+    with open(f'{OUTPUT_FOLDER}/{filename}', 'w') as output_file:
+        output_file.write(f'{number_of_antennas}\n')
+        for index, antenna_chosen_building in enumerate(antennas_chosen_building):
+            building_index = antenna_chosen_building
+            output_file.write(
+                f'{index} {buildings[building_index][0]} {buildings[building_index][1]}\n'
+            )
 
 
 if __name__ == '__main__':
