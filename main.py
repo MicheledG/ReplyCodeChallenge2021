@@ -3,7 +3,7 @@ Usage: python main.py <path_to>/<input_file_name>
 
 Note: python3
 """
-
+import json
 import sys
 import logging
 
@@ -17,7 +17,27 @@ def main(argv):
     logger.info(f'reading input file {filename}')
     width, height, buildings, antennas, reward = read_input_file(filename)
     logger.info('input file successfully read')
-    compute_score_per_building_antenna()
+    logger.info('computing scores of all antennas over all buildings')
+    all_antennas_scores = dict()
+    for antenna in antennas:
+        antenna_scores = dict()
+        for building in buildings:
+            reachable_buildings = find_reachable_buildings(
+                antenna_x=building[0],
+                antenna_y=building[1],
+                antenna_range=antenna[0],
+                buildings=buildings
+            )
+            score = compute_score_per_all_reachable_buildings(
+                antenna=antenna,
+                antenna_x=building[0],
+                antenna_y=building[1],
+                reachable_buildings=reachable_buildings,
+            )
+            antenna_scores[building[4]] = score
+        all_antennas_scores[antenna[2]] = antenna_scores
+    logger.info(f'computed antennas scores:\n{json.dumps(all_antennas_scores, indent=2)}')
+    create_output_file('test', all_antennas_scores, buildings)
 
 
 def read_input_file(filename):
@@ -64,6 +84,16 @@ def read_input_file(filename):
     return width, height, buildings, antennas, reward
 
 
+def compute_score_per_all_reachable_buildings(antenna, antenna_x, antenna_y, reachable_buildings):
+    score = 0
+    for building in reachable_buildings:
+        building_score = compute_score_per_building_antenna(building, antenna, antenna_x, antenna_y)
+        logger.debug(f'score for building:{building} and antenna: {antenna}')
+        score += building_score
+    logger.debug(f'all scores for antenna {antenna} placed in ({antenna_x, antenna_y})')
+    return score
+
+
 def compute_score_per_building_antenna(building, antenna, antenna_x, antenna_y):
     logger.debug(
         f'input to compute the score:\n'
@@ -81,7 +111,7 @@ def compute_score_per_building_antenna(building, antenna, antenna_x, antenna_y):
     return score
 
 
-def reachable_buildings(antenna_x, antenna_y, antenna_range, buildings):
+def find_reachable_buildings(antenna_x, antenna_y, antenna_range, buildings):
     """
     Given a point in grid (x,y) and its range,
     return the list of buildings reachable by that point
@@ -137,6 +167,23 @@ def sort_antennas_by_range(antennas):
     )
     logger.debug(f'sorted antennas by range speed:\n{sorted_antennas}')
     return sorted_antennas
+
+
+def create_output_file(filename, all_antennas_scores, buildings):
+    antenna_chosen_building = list()
+    buildings_availability = dict()
+    for antenna_index in all_antennas_scores.keys():
+        antenna_scores = all_antennas_scores[antenna_index]
+        best_building_index = -1
+        best_building_score = -1
+        for building_index in antenna_scores.keys():
+            building_score = antenna_scores[building_index]
+            if building_score > best_building_score and buildings_availability.get(building_index, True):
+                best_building_index = building_index
+                best_building_score = building_score
+        buildings_availability[best_building_index] = False
+        antenna_chosen_building.append(best_building_index)
+        logger.debug(f'antenna with index {antenna_index} placed on building {best_building_index}')
 
 
 if __name__ == '__main__':
