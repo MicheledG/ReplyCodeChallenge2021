@@ -67,6 +67,46 @@ def compute_score(buildings, antennas, i, j, Xa, Ya):
             buildings[i][2] * manhattandistance(buildings[i][0],buildings[i][1], Xa, Ya)
     return score
 
+def reachable_buildings(antenna_x, antenna_y, antenna_range, buildings):
+    """
+    Given a point in grid (x,y) and its range,
+    return the list of buildings reachable by that point
+
+    :param antenna_x:
+    :param antenna_y:
+    :param antenna_range:
+    :param buildings:
+    """
+    logger.debug(f'provided antenna info: x={antenna_x}, y={antenna_y}, range={antenna_range}')
+    buildings_in_range = list()
+    for building in buildings:
+        logger.debug(f'building position: x={building[0]}, y={building[1]}')
+        distance = manhattan_distance(antenna_x, antenna_y, building[0], building[1])
+        if distance <= antenna_range:
+            buildings_in_range.append(building)
+            logger.debug('building is reachable')
+        else:
+            logger.debug('building is not reachable by the provided point with the provide range')
+    logger.info(f'found {len(buildings_in_range)} reachable buildings')
+    return buildings_in_range
+
+
+def manhattan_distance(ix, iy, jx, jy):
+    """
+    Compute manhattan distance between i and j point
+
+    :param ix:
+    :param iy:
+    :param jx:
+    :param jy:
+    """
+    x_distance = abs(ix - jx)
+    y_distance = abs(iy - jy)
+    distance = x_distance + y_distance
+    logger.debug(f'i point: x={ix}, y={iy}; j point: x={jx}, y={jy}; distance={distance}')
+    return distance
+
+
 def sort_antennas_by_connection_speed(antennas):
     logger.debug(f'original list of antennas:\n{antennas}')
     sorted_antennas = sorted(
