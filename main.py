@@ -39,7 +39,7 @@ def main(argv):
             )
             antenna_scores[building[4]] = score
         all_antennas_scores[antenna[2]] = antenna_scores
-    logger.info(f'computed antennas scores:\n{json.dumps(all_antennas_scores, indent=2)}')
+    logger.info(f'computed antennas scores')
     create_output_file(filename, all_antennas_scores, buildings)
     logger.info('end')
 
